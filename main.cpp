@@ -12,6 +12,9 @@ struct Warrior
   unsigned int strength;
 };
 
+void killWarrior(vector<Warrior> &warriors, Warrior warrior);
+
+
 bool compareByX(const Warrior& a, const Warrior& b)
 {
 	return (a.x < b.x);
@@ -42,21 +45,24 @@ void printWarrior(const Warrior& warrior)
 	cout<<warrior.x<<" "<<warrior.y;
 }
 
-Warrior whoDies(const vector<Warrior>& warriors)
+Warrior whoDies(vector<Warrior>& warriors)
 {
 	size_t size = warriors.size();
 
-	if(size == 1)
-	{
-		return warriors[0];
-	}
-
 	if(size == 2)
 	{
-		return calculateLoss(warriors[0], warriors[1]);
+		Warrior loser = calculateLoss(warriors[0], warriors[1]);
+		killWarrior(warriors,loser);
 	}
 
 
+}
+
+void killWarrior(vector<Warrior> &warriors, Warrior warrior)
+{
+	printWarrior(warrior);
+
+	warriors.erase(warriors.begin() + warrior.id);
 }
 
 int main()
@@ -73,6 +79,8 @@ int main()
 	}
 
 	std::sort(warriors.begin(), warriors.end(), &compareByX);
+
+	whoDies(warriors);
 
 	return 0;
 }
