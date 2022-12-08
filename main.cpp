@@ -15,30 +15,29 @@ struct Warrior
   bool isAlive{true};
 };
 
-
-bool compareByX(const Warrior& a, const Warrior& b)
+bool compareByX(const Warrior &a, const Warrior &b)
 {
 	return (a.x < b.x);
 }
 
-bool compareByY(const Warrior& a, const Warrior& b)
+bool compareByY(const Warrior &a, const Warrior &b)
 {
 	return (a.y < b.y);
 }
 
-Warrior calculateLoss(const Warrior& a, const Warrior& b)
+Warrior calculateLoss(const Warrior &a, const Warrior &b)
 {
-	if(a.strength < b.strength)
+	if (a.strength < b.strength)
 	{
 		return a;
 	}
 
-	if(a.strength > b.strength)
+	if (a.strength > b.strength)
 	{
 		return b;
 	}
 
-	if(a.id > b.id)
+	if (a.id > b.id)
 	{
 		return a;
 	}
@@ -46,28 +45,26 @@ Warrior calculateLoss(const Warrior& a, const Warrior& b)
 	return b;
 }
 
-void printWarrior(const Warrior& warrior)
+void printWarrior(const Warrior &warrior)
 {
-	cout<<warrior.x<<" "<<warrior.y<<endl;
+	cout << warrior.x << " " << warrior.y << endl;
 }
 
-
-double distance(const Warrior& a, const Warrior& b)
+double distance(const Warrior &a, const Warrior &b)
 {
-	return sqrt((a.x - b.x) * (a.x-b.x) + (a.y-b.y)*(a.y-b.y));
+	return sqrt((a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y));
 }
 
-pair<Warrior, Warrior> findClosestMiddle(const vector<Warrior>& middleStrip, double min)
+pair<Warrior, Warrior> findClosestMiddle(const vector<Warrior> &middleStrip, double min)
 {
-	pair<Warrior, Warrior> pair (middleStrip[0], middleStrip[1]);
+	pair<Warrior, Warrior> pair(middleStrip[0], middleStrip[1]);
 	size_t size = middleStrip.size();
 
-	for(size_t i = 0; i<size; ++i)
+	for (size_t i = 0; i < size; ++i)
 	{
-		//printWarrior(middleStrip[i]);
-		for(size_t j = i+1; j<size && (middleStrip[j].y - middleStrip[i].y) < min; ++j)
+		for (size_t j = i + 1; j < size && (middleStrip[j].y - middleStrip[i].y) < min; ++j)
 		{
-			if(distance(middleStrip[i], middleStrip[j]) < min)
+			if (distance(middleStrip[i], middleStrip[j]) < min)
 			{
 				pair.first = middleStrip[i];
 				pair.second = middleStrip[j];
@@ -78,6 +75,20 @@ pair<Warrior, Warrior> findClosestMiddle(const vector<Warrior>& middleStrip, dou
 	return pair;
 }
 
+void killWarrior(vector<Warrior> &warriors, Warrior warrior)
+{
+	printWarrior(warrior);
+
+	for (auto it = warriors.begin(); it!=warriors.end(); ++it)
+	{
+		if (it->x==warrior.id)
+		{
+			warriors.erase(it);
+			return;
+		}
+	}
+}
+
 void killWarrior(Warrior *warrior)
 {
 	printWarrior(*warrior);
@@ -85,14 +96,9 @@ void killWarrior(Warrior *warrior)
 	warrior->isAlive = false;
 }
 
-pair<Warrior, Warrior> minDistanceTwoPairs(const pair<Warrior, Warrior>& a, const pair<Warrior, Warrior>& b)
+pair<Warrior, Warrior> minDistanceTwoPairs(const pair<Warrior, Warrior> &a, const pair<Warrior, Warrior> &b)
 {
-//	printWarrior(a.first);
-//	printWarrior(a.second);
-//	printWarrior(b.first);
-//	printWarrior(b.second);
-
-	if(distance(a.first, a.second) < distance(b.first, b.second))
+	if (distance(a.first, a.second) < distance(b.first, b.second))
 	{
 		return a;
 	}
@@ -100,23 +106,23 @@ pair<Warrior, Warrior> minDistanceTwoPairs(const pair<Warrior, Warrior>& a, cons
 	return b;
 }
 
-pair<Warrior, Warrior> minDistanceThreeWarriors(Warrior warriors[], size_t size)
+pair<Warrior, Warrior> minDistanceThreeWarriors(vector<Warrior>::iterator begin, vector<Warrior>::iterator end)
 {
-	double min = 9999;
+	double min = 999999999999999;
 
-	pair<Warrior, Warrior> pair (warriors[0], warriors[1]);
+	pair<Warrior, Warrior> pair(*begin, *(begin + 1));
 
-	for(unsigned int i=0; i<size; ++i)
+	for(auto i=begin; i != end; ++i)
 	{
-		for(unsigned int j=i+1; j<size; ++j)
+		for(auto j=i+1; j != end; ++j)
 		{
-			double dist = distance(warriors[i], warriors[j]);
+			double dist = distance(*i, *j);
+
 			if(dist < min)
 			{
 				min = dist;
-				pair.first = warriors[i];
-				pair.second =warriors[j];
-
+				pair.first = *i;
+				pair.second = *j;
 			}
 		}
 	}
@@ -124,80 +130,69 @@ pair<Warrior, Warrior> minDistanceThreeWarriors(Warrior warriors[], size_t size)
 	return pair;
 }
 
-pair<Warrior, Warrior> findClosestPair(Warrior warriors[], size_t n)
+pair<Warrior, Warrior> findClosestPair(vector<Warrior>::iterator begin, vector<Warrior>::iterator end)
 {
-	if(n == 2)
+	vector<Warrior>::difference_type n = end - begin;
+
+	if (n<=3)
 	{
-		return {warriors[0], warriors[1]};
+		return minDistanceThreeWarriors(begin, end);
 	}
 
-	if(n == 3)
-	{
-		return minDistanceThreeWarriors(warriors, n);
-	}
+	vector<Warrior>::difference_type midPoint = n/2;
+	Warrior middle = *(begin + midPoint);
 
-	size_t midPoint = n/2;
-	Warrior middle = warriors[midPoint];
+	pair<Warrior, Warrior> left = findClosestPair(begin, begin + midPoint - 1);
 
-	pair<Warrior, Warrior> left = findClosestPair(warriors, midPoint);
-	//printWarrior(left.first);
-	//printWarrior(left.second);
-
-	pair<Warrior, Warrior> right = findClosestPair(warriors + midPoint, n-midPoint);
-	//printWarrior(right.first);
-	//printWarrior(right.second);
-
+	pair<Warrior, Warrior> right = findClosestPair(begin + midPoint, end);
 
 	pair<Warrior, Warrior> min = minDistanceTwoPairs(left, right);
-
-	//printWarrior(min.first);
-	//printWarrior(min.second);
 
 	double minDist = distance(min.first, min.second);
 
 	vector<Warrior> strip;
 
-	sort(strip.begin(), strip.end(), &compareByX);
+	sort(strip.begin(), strip.end(), &compareByY);
 
-	for(size_t i=0; i<n; ++i)
+	for (vector<Warrior>::difference_type i = 0; i < n; ++i)
 	{
-		if(abs(double(warriors[i].x - middle.x)) < minDist)
+		if (abs(double((begin + i)->x - middle.x)) < minDist)
 		{
-			strip.push_back(warriors[i]);
+			strip.push_back(*(begin + i));
 		}
-	}
-
-	for(auto&& el : strip)
-	{
-		//printWarrior(el);
 	}
 
 	return minDistanceTwoPairs(min, findClosestMiddle(strip, minDist));
 }
 
-void fight();
+void fight(vector<Warrior> &warriors, pair<Warrior, Warrior> &&pair)
+{
+	Warrior victim = calculateLoss(pair.first, pair.second);
 
+	killWarrior(warriors, victim);
+}
 
 int main()
 {
 	unsigned short n, t;
-	cin>>n>>t;
+	cin >> n >> t;
 
-	auto *warriors = new Warrior[n];
+	vector<Warrior> warriors(n);
 
-	for(unsigned int i = 0; i<n; ++i)
+	for (unsigned int i = 0; i < n; ++i)
 	{
 		cin >> warriors[i].x >> warriors[i].y >> warriors[i].strength;
 		warriors[i].id = i;
 	}
 
-	std::sort(warriors, warriors+n, &compareByX);
+	std::sort(warriors.begin(), warriors.end(), &compareByX);
 
-	pair<Warrior, Warrior> pair = findClosestPair(warriors, n);
+	findClosestPair(warriors.begin(), warriors.end());
 
-
-
-	delete [] warriors;
+	for (unsigned int i = 0; i < t; ++i)
+	{
+		fight(warriors, findClosestPair(warriors.begin(), warriors.end()));
+	}
 
 	return 0;
 }
